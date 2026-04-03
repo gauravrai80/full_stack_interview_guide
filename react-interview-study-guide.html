@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React + Redux Interview Study Guide</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg2: #1a1d2e;
+    --bg3: #21253a;
+    --border: #2e3250;
+    --text: #e2e8f0;
+    --muted: #8892b0;
+    --accent: #64ffda;
+    --accent2: #7c3aed;
+    --accent3: #f59e0b;
+    --react: #61dafb;
+    --redux: #764abc;
+    --router: #ca8a04;
+    --api: #16a34a;
+    --js: #f97316;
+    --danger: #ef4444;
+    --success: #22c55e;
+    --info: #3b82f6;
+    --tag-bg: rgba(100,255,218,0.08);
+    --tag-text: #64ffda;
+    --code-bg: #0d1117;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; font-size: 15px; }
+
+  /* ── LAYOUT ── */
+  .app { display: flex; height: 100vh; overflow: hidden; }
+  .sidebar { width: 280px; background: var(--bg2); border-right: 1px solid var(--border); overflow-y: auto; flex-shrink: 0; display: flex; flex-direction: column; }
+  .main { flex: 1; overflow-y: auto; padding: 0; }
+
+  /* ── SIDEBAR ── */
+  .sidebar-header { padding: 20px 16px 12px; border-bottom: 1px solid var(--border); }
+  .sidebar-header h1 { font-size: 14px; font-weight: 700; color: var(--accent); letter-spacing: 0.05em; text-transform: uppercase; }
+  .sidebar-header p { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .progress-bar-wrap { margin: 12px 16px; background: var(--bg3); border-radius: 4px; height: 4px; }
+  .progress-bar { height: 4px; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; width: 0%; transition: width 0.4s; }
+  .progress-label { font-size: 11px; color: var(--muted); padding: 4px 16px 8px; }
+  .nav-section { padding: 8px 0; }
+  .nav-section-title { padding: 6px 16px 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 16px; cursor: pointer; font-size: 12.5px; color: var(--muted); transition: all 0.15s; border-left: 2px solid transparent; }
+  .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+  .nav-item.active { color: var(--accent); background: rgba(100,255,218,0.06); border-left-color: var(--accent); }
+  .nav-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .nav-star { font-size: 10px; margin-left: auto; }
+  .nav-item.done .nav-dot { background: var(--success) !important; }
+  .search-wrap { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  .search-input { width: 100%; background: var(--bg3); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 7px 10px; font-size: 12px; outline: none; }
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--muted); }
+
+  /* ── CONTENT ── */
+  .content { max-width: 860px; margin: 0 auto; padding: 32px 32px 80px; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── HERO ── */
+  .hero { background: linear-gradient(135deg, #1a1d2e 0%, #0f1117 100%); border: 1px solid var(--border); border-radius: 16px; padding: 40px; margin-bottom: 32px; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 30% 50%, rgba(100,255,218,0.04) 0%, transparent 60%), radial-gradient(ellipse at 70% 50%, rgba(124,58,237,0.04) 0%, transparent 60%); }
+  .hero h1 { font-size: 28px; font-weight: 800; background: linear-gradient(135deg, var(--accent), var(--react), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; position: relative; }
+  .hero p { color: var(--muted); margin-top: 8px; font-size: 14px; position: relative; }
+  .hero-tags { display: flex; gap: 8px; justify-content: center; margin-top: 16px; flex-wrap: wrap; position: relative; }
+  .tag { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .tag-react { background: rgba(97,218,251,0.1); color: var(--react); border: 1px solid rgba(97,218,251,0.2); }
+  .tag-redux { background: rgba(118,74,188,0.1); color: var(--redux); border: 1px solid rgba(118,74,188,0.25); }
+  .tag-js { background: rgba(249,115,22,0.1); color: var(--js); border: 1px solid rgba(249,115,22,0.2); }
+  .tag-router { background: rgba(202,138,4,0.1); color: var(--router); border: 1px solid rgba(202,138,4,0.2); }
+  .tag-api { background: rgba(22,163,74,0.1); color: var(--api); border: 1px solid rgba(22,163,74,0.2); }
+
+  /* ── STATS GRID ── */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
+  .stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; }
+  .stat-num { font-size: 24px; font-weight: 800; color: var(--accent); }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* ── SECTION HEADER ── */
+  .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .section-badge { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .section-header h2 { font-size: 20px; font-weight: 700; }
+  .section-header span { font-size: 12px; color: var(--muted); margin-left: auto; }
+
+  /* ── QUESTION CARD ── */
+  .q-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; overflow: hidden; transition: border-color 0.2s; }
+  .q-card:hover { border-color: rgba(100,255,218,0.2); }
+  .q-header { padding: 16px 20px; cursor: pointer; display: flex; align-items: flex-start; gap: 12px; }
+  .q-header:hover { background: rgba(255,255,255,0.01); }
+  .q-number { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; background: var(--bg3); color: var(--muted); }
+  .q-title { flex: 1; font-size: 14.5px; font-weight: 600; color: var(--text); padding-top: 4px; }
+  .q-badges { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+  .badge { padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+  .badge-beginner { background: rgba(34,197,94,0.12); color: #4ade80; }
+  .badge-intermediate { background: rgba(251,191,36,0.12); color: #fbbf24; }
+  .badge-advanced { background: rgba(239,68,68,0.12); color: #f87171; }
+  .badge-star { background: rgba(100,255,218,0.12); color: var(--accent); }
+  .q-chevron { color: var(--muted); font-size: 12px; margin-top: 6px; transition: transform 0.2s; }
+  .q-body { display: none; padding: 0 20px 20px; border-top: 1px solid var(--border); }
+  .q-card.open .q-body { display: block; }
+  .q-card.open .q-chevron { transform: rotate(180deg); }
+  .q-card.done .q-number { background: rgba(34,197,94,0.15); color: var(--success); }
+
+  /* ── CONTENT BLOCKS ── */
+  .block { margin-top: 16px; }
+  .block-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .block-label::before { content: ''; display: inline-block; width: 3px; height: 12px; border-radius: 2px; }
+  .bl-def::before { background: var(--accent); }
+  .bl-deep::before { background: var(--accent2); }
+  .bl-simple::before { background: var(--success); }
+  .bl-real::before { background: var(--info); }
+  .bl-pitfall::before { background: var(--danger); }
+  .bl-oneliner::before { background: var(--accent3); }
+  .bl-compare::before { background: var(--react); }
+  .bl-followup::before { background: var(--router); }
+  .bl-trap::before { background: #ec4899; }
+
+  .definition { background: rgba(100,255,218,0.04); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 14px; color: #c8d6e5; }
+  .deep-text { font-size: 14px; color: #94a3b8; line-height: 1.8; }
+  .code-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: 'Fira Code', 'Cascadia Code', monospace; font-size: 12.5px; overflow-x: auto; line-height: 1.6; margin-top: 6px; white-space: pre; }
+  .code-comment { color: #6a9955; }
+  .code-keyword { color: #569cd6; }
+  .code-string { color: #ce9178; }
+  .code-fn { color: #dcdcaa; }
+  .pitfall-item { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; font-size: 13.5px; }
+  .pitfall-item::before { content: '✗'; color: var(--danger); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .one-liner { background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(124,58,237,0.08)); border: 1px solid rgba(245,158,11,0.2); border-radius: 8px; padding: 12px 16px; font-size: 13.5px; color: #fcd34d; font-style: italic; }
+  .compare-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }
+  .compare-table th { background: var(--bg3); padding: 8px 12px; text-align: left; font-weight: 600; color: var(--muted); font-size: 11px; text-transform: uppercase; }
+  .compare-table td { padding: 8px 12px; border-top: 1px solid var(--border); vertical-align: top; color: #94a3b8; }
+  .compare-table tr:hover td { background: rgba(255,255,255,0.01); }
+  .follow-up { background: rgba(202,138,4,0.06); border: 1px solid rgba(202,138,4,0.2); border-radius: 8px; padding: 12px 16px; }
+  .follow-up p { font-size: 13px; color: #d97706; font-weight: 500; margin-bottom: 4px; }
+  .follow-up span { font-size: 12.5px; color: var(--muted); font-style: italic; }
+  .trap-box { background: rgba(236,72,153,0.05); border: 1px solid rgba(236,72,153,0.2); border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #f9a8d4; }
+  .trap-box strong { color: #ec4899; }
+
+  /* ── CHEAT SHEET ── */
+  .cheat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .cheat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .cheat-card h4 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); margin-bottom: 10px; }
+  .cheat-item { display: flex; align-items: flex-start; gap: 8px; padding: 4px 0; font-size: 12.5px; color: #94a3b8; border-bottom: 1px solid rgba(255,255,255,0.03); }
+  .cheat-item:last-child { border-bottom: none; }
+  .cheat-item code { background: var(--bg3); color: var(--accent); padding: 1px 5px; border-radius: 3px; font-size: 11px; flex-shrink: 0; font-family: monospace; }
+
+  /* ── TOP 20 ── */
+  .top20-list { counter-reset: q; }
+  .top20-item { display: flex; align-items: flex-start; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .top20-item:last-child { border-bottom: none; }
+  .top20-num { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, var(--accent2), var(--accent)); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; color: #fff; }
+  .top20-q { font-size: 14px; font-weight: 500; color: var(--text); flex: 1; }
+  .top20-why { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* ── MOCK INTERVIEW ── */
+  .mock-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 20px; overflow: hidden; }
+  .mock-header { padding: 14px 20px; background: var(--bg3); display: flex; align-items: center; gap: 10px; }
+  .mock-role { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+  .mock-interviewer { background: rgba(124,58,237,0.15); color: #a78bfa; border: 1px solid rgba(124,58,237,0.2); }
+  .mock-candidate { background: rgba(34,197,94,0.1); color: #4ade80; border: 1px solid rgba(34,197,94,0.2); }
+  .mock-trap { background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+  .mock-content { padding: 16px 20px; }
+  .mock-q { font-size: 14.5px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+  .mock-a { font-size: 13.5px; color: #94a3b8; line-height: 1.8; }
+  .mock-reveal-btn { margin-top: 10px; padding: 7px 16px; background: rgba(100,255,218,0.08); border: 1px solid rgba(100,255,218,0.2); color: var(--accent); border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600; transition: all 0.15s; }
+  .mock-reveal-btn:hover { background: rgba(100,255,218,0.15); }
+  .mock-answer { display: none; margin-top: 12px; padding: 12px 16px; background: rgba(34,197,94,0.04); border: 1px solid rgba(34,197,94,0.15); border-radius: 8px; font-size: 13px; color: #86efac; line-height: 1.7; }
+  .mock-answer.visible { display: block; }
+  .mock-trap-note { margin-top: 8px; padding: 8px 12px; background: rgba(239,68,68,0.05); border-left: 3px solid var(--danger); font-size: 12px; color: #fca5a5; border-radius: 0 6px 6px 0; }
+
+  /* ── MARK DONE BTN ── */
+  .mark-done-btn { padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--bg3); color: var(--muted); transition: all 0.15s; margin-top: 16px; }
+  .mark-done-btn:hover { border-color: var(--success); color: var(--success); }
+  .q-card.done .mark-done-btn { background: rgba(34,197,94,0.1); border-color: var(--success); color: var(--success); }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .cheat-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-header">
+    <h1>React Interview Prep</h1>
+    <p>Senior Frontend Engineer Guide</p>
+  </div>
+  <div class="search-wrap">
+    <input class="search-input" placeholder="Search questions..." oninput="searchQuestions(this.value)" type="text">
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="prog-bar"></div></div>
+  <div class="progress-label" id="prog-label">0 / 60 completed</div>
+  <div class="nav-section">
+    <div class="nav-section-title">Overview</div>
+    <div class="nav-item active" onclick="showPage('home')" id="nav-home"><span class="nav-dot" style="background:#64ffda"></span> Home Dashboard</div>
+    <div class="nav-item" onclick="showPage('cheatsheet')" id="nav-cheatsheet"><span class="nav-dot" style="background:#a78bfa"></span> Cheat Sheet</div>
+    <div class="nav-item" onclick="showPage('top20')" id="nav-top20"><span class="nav-dot" style="background:#fbbf24"></span> Top 20 Questions</div>
+    <div class="nav-item" onclick="showPage('mock')" id="nav-mock"><span class="nav-dot" style="background:#f87171"></span> Mock Interview</div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-title">Core JavaScript</div>
+    <div class="nav-item" onclick="showPage('js')" id="nav-js"><span class="nav-dot" style="background:#f97316"></span> JS Fundamentals <span class="nav-star">2q</span></div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-title">React</div>
+    <div class="nav-item" onclick="showPage('basics')" id="nav-basics"><span class="nav-dot" style="background:#61dafb"></span> React Basics <span class="nav-star">7q</span></div>
+    <div class="nav-item" onclick="showPage('state')" id="nav-state"><span class="nav-dot" style="background:#22d3ee"></span> State & Props <span class="nav-star">⭐</span></div>
+    <div class="nav-item" onclick="showPage('hooks')" id="nav-hooks"><span class="nav-dot" style="background:#06b6d4"></span> Hooks Deep Dive <span class="nav-star">⭐⭐</span></div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-title">Ecosystem</div>
+    <div class="nav-item" onclick="showPage('router')" id="nav-router"><span class="nav-dot" style="background:#ca8a04"></span> React Router <span class="nav-star">6q</span></div>
+    <div class="nav-item" onclick="showPage('redux')" id="nav-redux"><span class="nav-dot" style="background:#764abc"></span> Redux / RTK <span class="nav-star">⭐⭐</span></div>
+    <div class="nav-item" onclick="showPage('axios')" id="nav-axios"><span class="nav-dot" style="background:#16a34a"></span> API / Axios <span class="nav-star">5q</span></div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+<div class="content">
+
+<!-- ══════════════════════════════════════════ HOME PAGE ══════════════════════════════════════════ -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <h1>React + Redux Interview Mastery</h1>
+    <p>Senior Frontend Engineer Study Guide · Beginner → Intermediate → Advanced</p>
+    <div class="hero-tags">
+      <span class="tag tag-js">JavaScript</span>
+      <span class="tag tag-react">React 18</span>
+      <span class="tag tag-redux">Redux Toolkit</span>
+      <span class="tag tag-router">React Router v6</span>
+      <span class="tag tag-api">Axios / API</span>
+    </div>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num">60+</div><div class="stat-label">Total Questions</div></div>
+    <div class="stat-card"><div class="stat-num">7</div><div class="stat-label">Topic Sections</div></div>
+    <div class="stat-card"><div class="stat-num" id="done-count">0</div><div class="stat-label">Completed</div></div>
+    <div class="stat-card"><div class="stat-num">5</div><div class="stat-label">Mock Interviews</div></div>
+  </div>
+  <div class="section-header">
+    <div class="section-badge" style="background:rgba(100,255,218,0.1)">🗺️</div>
+    <h2>How to Use This Guide</h2>
+  </div>
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;font-size:14px;color:#94a3b8;line-height:1.9;margin-bottom:24px;">
+    <p>Each question includes: <strong style="color:var(--text)">Definition → Deep Explanation → Simple Example → Real-World Code → Common Pitfalls → Interview One-Liner → Comparison → Follow-up Question.</strong></p>
+    <p style="margin-top:10px;">Click any question card to expand it. Use <strong style="color:var(--accent)">Mark Done</strong> to track progress. The sidebar shows your completion rate.</p>
+    <p style="margin-top:10px;">⭐ = Must-know for interviews. Start with the Top 20 section before your interview.</p>
+  </div>
+  <div class="section-header">
+    <div class="section-badge" style="background:rgba(97,218,251,0.1)">⚡</div>
+    <h2>Quick Navigation</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
+    <div onclick="showPage('js')" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(249,115,22,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="font-size:20px;margin-bottom:6px;">🧠</div>
+      <div style="font-weight:700;font-size:14px;color:var(--js)">Core JavaScript</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px;">Library vs Framework, React's nature</div>
+    </div>
+    <div onclick="showPage('basics')" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(97,218,251,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="font-size:20px;margin-bottom:6px;">⚛️</div>
+      <div style="font-weight:700;font-size:14px;color:var(--react)">React Basics</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px;">SPA, JSX, Virtual DOM, Reconciliation</div>
+    </div>
+    <div onclick="showPage('state')" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(34,211,238,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="font-size:20px;margin-bottom:6px;">🔄</div>
+      <div style="font-weight:700;font-size:14px;color:#22d3ee">State & Props</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px;">useState, Context, Race Conditions</div>
+    </div>
+    <div onclick="showPage('hooks')" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(6,182,212,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="font-size:20px;margin-bottom:6px;">🎣</div>
+      <div style="font-weight:700;font-size:14px;color:#06b6d4">Hooks Deep Dive</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px;">useRef, useReducer, useMemo, useCallback</div>
+    </div>
+    <div onclick="showPage('router')" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(202,138,4,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="font-size:20px;margin-bottom:6px;">🌐</div>
+      <div style="font-weight:700;font-size:14px;color:var(--router)">React Router</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px;">v6, Outlet, Protected Routes, History API</div>
+    </div>
+    <div onclick="showPage('redux')" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(118,74,188,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="font-size:20px;margin-bottom:6px;">📦</div>
+      <div style="font-weight:700;font-size:14px;color:var(--redux)">Redux / RTK</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px;">Slices, Thunks, Flux, Immer</div>
+    </div>
+    <div onclick="showPage('axios')" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(22,163,74,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="font-size:20px;margin-bottom:6px;">🌍</div>
+      <div style="font-weight:700;font-size:14px;color:var(--api)">API / Axios</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px;">Interceptors, Token Refresh, Query Params</div>
+    </div>
+    <div onclick="showPage('mock')" style="background:var(--bg2);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:16px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(239,68,68,0.6)'" onmouseout="this.style.borderColor='rgba(239,68,68,0.3)'">
+      <div style="font-size:20px;margin-bottom:6px;">🎯</div>
+      <div style="font-weight:700;font-size:14px;color:#f87171">Mock Interview</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px;">5 tricky questions with interviewer simulation</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ JS PAGE ══════════════════════════════════════════ -->
+<div class="page" id="page-js">
+  <div class="section-header">
+    <div class="section-badge" style="background:rgba(249,115,22,0.1)">🧠</div>
+    <h2 style="color:var(--js)">Core JavaScript Fundamentals</h2>
+    <span>Beginner → Intermediate</span>
+  </div>
+
+  <!-- Q1 -->
+  <div class="q-card" id="qjs1">
+    <div class="q-header" onclick="toggleQ('qjs1')">
+      <div class="q-number">1</div>
+      <div class="q-title">Library vs Framework — what is the core difference?</div>
+      <div class="q-badges"><span class="badge badge-beginner">Beginner</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-def">Definition</div>
+        <div class="definition">A <strong>library</strong> is code you call; a <strong>framework</strong> calls your code. The key concept is <em>Inversion of Control</em>.</div>
+      </div>
+      <div class="block"><div class="block-label bl-deep">Deep Explanation</div>
+        <div class="deep-text">With a <strong>library</strong> (like lodash, axios), <em>you</em> control the program flow. You import it and call its functions whenever you want.<br><br>With a <strong>framework</strong> (like Angular, Next.js), the framework owns the control flow. It calls your code at prescribed points (lifecycle hooks, route handlers). This is the Hollywood Principle: "Don't call us, we'll call you."<br><br>Framework = opinionated scaffolding + enforced conventions. Library = focused utility, you integrate it however you want.</div>
+      </div>
+      <div class="block"><div class="block-label bl-simple">Simple Example</div>
+        <div class="code-block"><span class="code-comment">// Library: YOU call the function</span>
+<span class="code-keyword">import</span> axios <span class="code-keyword">from</span> <span class="code-string">'axios'</span>;
+axios.get(<span class="code-string">'/api/data'</span>); <span class="code-comment">// You decide when + how</span>
+
+<span class="code-comment">// Framework: IT calls YOUR function</span>
+<span class="code-comment">// Angular's lifecycle hook — Angular calls this, not you</span>
+<span class="code-fn">ngOnInit</span>() { this.loadData(); }</div>
+      </div>
+      <div class="block"><div class="block-label bl-pitfall">Common Pitfalls</div>
+        <div class="pitfall-item">Saying "React is a framework" — React is a UI library. It only handles the View layer.</div>
+        <div class="pitfall-item">Confusing "opinionated" with "framework" — a library can be opinionated too.</div>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"In a library, you call the code. In a framework, the framework calls your code — this is Inversion of Control."</div>
+      </div>
+      <div class="block"><div class="block-label bl-followup">Interviewer Follow-Up</div>
+        <div class="follow-up"><p>Q: "So if React is just a library, what makes a 'React framework'?"</p><span>Expected answer: Next.js, Remix, Gatsby — they add routing, SSR, file-based conventions ON TOP of React, making React + framework = full-stack framework.</span></div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qjs1')">✓ Mark as Done</button>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="q-card" id="qjs2">
+    <div class="q-header" onclick="toggleQ('qjs2')">
+      <div class="q-number">2</div>
+      <div class="q-title">Is React really a library or a framework? ⭐</div>
+      <div class="q-badges"><span class="badge badge-star">⭐ Important</span><span class="badge badge-beginner">Beginner</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-def">Definition</div>
+        <div class="definition">React is officially a <strong>JavaScript library for building user interfaces</strong>. It handles only the View layer (V in MVC).</div>
+      </div>
+      <div class="block"><div class="block-label bl-deep">Deep Explanation</div>
+        <div class="deep-text">React <em>by itself</em> is a library — it only renders UI. It has no built-in routing, no global state management, no HTTP client, no form validation.<br><br>However, the <strong>React ecosystem</strong> (React + Router + Redux + etc.) behaves like a framework. That's why people colloquially call it a "framework."<br><br><strong>Interview trap:</strong> The question is testing whether you know the precise definition and whether you can back it up. Don't just say "it's a framework because everyone uses it that way."</div>
+      </div>
+      <div class="block"><div class="block-label bl-compare">React vs Angular</div>
+        <table class="compare-table">
+          <tr><th>Aspect</th><th>React</th><th>Angular</th></tr>
+          <tr><td>Type</td><td>UI Library</td><td>Full Framework</td></tr>
+          <tr><td>Routing</td><td>External (React Router)</td><td>Built-in</td></tr>
+          <tr><td>HTTP</td><td>External (Axios/Fetch)</td><td>HttpClient built-in</td></tr>
+          <tr><td>State</td><td>External (Redux/Zustand)</td><td>Services + RxJS</td></tr>
+          <tr><td>Opinion</td><td>Flexible</td><td>Highly opinionated</td></tr>
+        </table>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"React is a library — it only handles rendering UI. The ecosystem around it can make it feel like a framework, but React alone is just the View layer."</div>
+      </div>
+      <div class="block"><div class="block-label bl-trap">Interviewer Trap</div>
+        <div class="trap-box"><strong>Trap:</strong> "But React has hooks, context, concurrent features — doesn't that make it a framework?" <br>→ Answer: Those are still UI-layer concerns. React doesn't own your routing, data fetching strategy, or state management architecture.</div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qjs2')">✓ Mark as Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ BASICS PAGE ══════════════════════════════════════════ -->
+<div class="page" id="page-basics">
+  <div class="section-header">
+    <div class="section-badge" style="background:rgba(97,218,251,0.1)">⚛️</div>
+    <h2 style="color:var(--react)">React Basics</h2>
+    <span>Beginner → Intermediate</span>
+  </div>
+
+  <!-- Q: SPA -->
+  <div class="q-card" id="qb1">
+    <div class="q-header" onclick="toggleQ('qb1')">
+      <div class="q-number">1</div>
+      <div class="q-title">What is an SPA? Advantages and disadvantages? ⭐</div>
+      <div class="q-badges"><span class="badge badge-star">⭐</span><span class="badge badge-beginner">Beginner</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-def">Definition</div>
+        <div class="definition">A <strong>Single Page Application</strong> loads one HTML page and dynamically updates content via JavaScript without full page reloads. Navigation is handled client-side.</div>
+      </div>
+      <div class="block"><div class="block-label bl-deep">Deep Explanation</div>
+        <div class="deep-text">In a traditional MPA (Multi-Page App), every route change triggers a new HTML file from the server. In an SPA, the server sends one HTML file once; React's router intercepts navigation and swaps components in the DOM.<br><br>This gives a native app feel — no white flash between pages, shared state persists across routes, and assets (CSS, JS) only load once.</div>
+      </div>
+      <div class="block"><div class="block-label bl-compare">Pros vs Cons</div>
+        <table class="compare-table">
+          <tr><th>Advantages</th><th>Disadvantages</th></tr>
+          <tr><td>Fast, seamless navigation after initial load</td><td>Slow initial load (large JS bundle)</td></tr>
+          <tr><td>Rich, app-like UX</td><td>Poor SEO by default (empty HTML)</td></tr>
+          <tr><td>Reduced server load</td><td>Requires JS enabled</td></tr>
+          <tr><td>Shared state across views</td><td>Complex state management</td></tr>
+          <tr><td>Works offline with PWA</td><td>Browser history management needed</td></tr>
+        </table>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"An SPA loads once, then React handles routing client-side — great UX but bad SEO unless you use SSR (like Next.js)."</div>
+      </div>
+      <div class="block"><div class="block-label bl-followup">Interviewer Follow-Up</div>
+        <div class="follow-up"><p>Q: "How would you solve the SEO problem of SPAs?"</p><span>Answer: Server-Side Rendering (Next.js), Static Site Generation, or pre-rendering. The server sends pre-rendered HTML for crawlers to read.</span></div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qb1')">✓ Mark as Done</button>
+    </div>
+  </div>
+
+  <!-- Q: Vite vs CRA -->
+  <div class="q-card" id="qb2">
+    <div class="q-header" onclick="toggleQ('qb2')">
+      <div class="q-number">2</div>
+      <div class="q-title">What is Vite? Why is it faster than CRA?</div>
+      <div class="q-badges"><span class="badge badge-beginner">Beginner</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-def">Definition</div>
+        <div class="definition">Vite is a next-generation build tool that leverages native ES modules in the browser for dev, and Rollup for production builds. CRA uses Webpack for everything.</div>
+      </div>
+      <div class="block"><div class="block-label bl-deep">Deep Explanation</div>
+        <div class="deep-text"><strong>Why CRA is slow:</strong> CRA bundles your entire app with Webpack before the dev server can respond. For 1000 files, Webpack parses, transforms, and bundles ALL of them on every startup.<br><br><strong>Why Vite is fast:</strong><br>1. <strong>No bundling in dev</strong> — Vite serves files via native ESM. The browser imports files on-demand. Startup time is near-instant regardless of project size.<br>2. <strong>esbuild for transforms</strong> — esbuild (Go-based) transpiles TypeScript/JSX 10-100x faster than Babel.<br>3. <strong>Hot Module Replacement (HMR)</strong> — Only the changed module is updated, not the whole bundle.</div>
+      </div>
+      <div class="block"><div class="block-label bl-compare">Vite vs CRA</div>
+        <table class="compare-table">
+          <tr><th></th><th>Vite</th><th>CRA (Webpack)</th></tr>
+          <tr><td>Dev start</td><td>~300ms</td><td>~10-30s</td></tr>
+          <tr><td>HMR</td><td>Instant</td><td>Slow on large apps</td></tr>
+          <tr><td>Bundler</td><td>Rollup (prod)</td><td>Webpack (always)</td></tr>
+          <tr><td>Config</td><td>Minimal, extensible</td><td>Opinionated, ejected needed</td></tr>
+        </table>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"Vite skips bundling in dev by using native ESM, making startup near-instant. CRA bundles everything with Webpack before the server starts."</div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qb2')">✓ Mark as Done</button>
+    </div>
+  </div>
+
+  <!-- Q: Virtual DOM -->
+  <div class="q-card" id="qb3">
+    <div class="q-header" onclick="toggleQ('qb3')">
+      <div class="q-number">3</div>
+      <div class="q-title">What is the Virtual DOM? How does React use it? ⭐</div>
+      <div class="q-badges"><span class="badge badge-star">⭐</span><span class="badge badge-intermediate">Intermediate</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-def">Definition</div>
+        <div class="definition">The Virtual DOM (VDOM) is a lightweight in-memory JavaScript representation of the real DOM. React uses it to compute the minimal set of changes needed before touching the actual DOM.</div>
+      </div>
+      <div class="block"><div class="block-label bl-deep">Deep Explanation</div>
+        <div class="deep-text">Real DOM manipulation is expensive — browsers must recalculate styles, layout, and repaint. React avoids unnecessary DOM operations with a 3-step process:<br><br>
+          <strong>1. Render phase:</strong> When state changes, React creates a new VDOM tree.<br>
+          <strong>2. Diffing (Reconciliation):</strong> React compares the new VDOM with the previous one (the "diff"). It identifies only what changed.<br>
+          <strong>3. Commit phase:</strong> React applies only the minimal DOM mutations needed.<br><br>
+          Key: The VDOM itself isn't magic — calling DOM APIs directly can be faster. The VDOM's value is in <em>batching</em> updates and giving React a declarative API where you describe UI by state, not by manual DOM imperatives.</div>
+      </div>
+      <div class="block"><div class="block-label bl-simple">Simple Example</div>
+        <div class="code-block"><span class="code-comment">// Without VDOM: manual DOM, expensive</span>
+document.<span class="code-fn">getElementById</span>(<span class="code-string">'count'</span>).textContent = count;
+
+<span class="code-comment">// With React VDOM: declarative, React handles the diff</span>
+<span class="code-keyword">const</span> App = () => &lt;p&gt;{count}&lt;/p&gt;;
+<span class="code-comment">// React figures out only the text node changed</span></div>
+      </div>
+      <div class="block"><div class="block-label bl-pitfall">Common Pitfalls</div>
+        <div class="pitfall-item">Saying "VDOM is always faster than real DOM" — it's not. Direct DOM can be faster; VDOM's benefit is developer ergonomics + smart batching.</div>
+        <div class="pitfall-item">Confusing VDOM with Shadow DOM (browser native, for web components).</div>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"The VDOM is React's in-memory DOM copy. On state change, React diffs old vs new VDOM and only updates what changed in the real DOM — minimizing expensive repaints."</div>
+      </div>
+      <div class="block"><div class="block-label bl-trap">Interviewer Trap</div>
+        <div class="trap-box"><strong>Trap:</strong> "Is the Virtual DOM always faster?" <br>→ No! Svelte (no VDOM) and SolidJS are often faster because they compile to precise DOM updates. The VDOM is a useful abstraction, not a performance guarantee.</div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qb3')">✓ Mark as Done</button>
+    </div>
+  </div>
+
+  <!-- Q: Reconciliation -->
+  <div class="q-card" id="qb4">
+    <div class="q-header" onclick="toggleQ('qb4')">
+      <div class="q-number">4</div>
+      <div class="q-title">Explain React's Reconciliation (diffing) algorithm. How do keys affect it? ⭐</div>
+      <div class="q-badges"><span class="badge badge-star">⭐</span><span class="badge badge-intermediate">Intermediate</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-def">Definition</div>
+        <div class="definition">Reconciliation is React's algorithm for computing the diff between the current and new VDOM trees, then updating the real DOM minimally. It uses two heuristics to achieve O(n) time instead of the theoretical O(n³).</div>
+      </div>
+      <div class="block"><div class="block-label bl-deep">Deep Explanation</div>
+        <div class="deep-text"><strong>Heuristic 1 — Type check:</strong> If the root element type changes (e.g. <code>&lt;div&gt;</code> → <code>&lt;span&gt;</code>), React tears down the entire subtree and builds fresh. If the type is the same, React updates attributes in-place.<br><br>
+          <strong>Heuristic 2 — Keys:</strong> When rendering lists, React uses keys to match old vs new elements. Without keys, React assumes position-based matching — adding an element at the top causes every other element to be re-rendered. With stable keys, React knows exactly which element moved, was added, or removed.<br><br>
+          <strong>Fiber:</strong> Modern React uses Fiber architecture — reconciliation is async and interruptible, allowing React to pause work and prioritize urgent updates (user input > background data load).</div>
+      </div>
+      <div class="block"><div class="block-label bl-simple">Keys Example</div>
+        <div class="code-block"><span class="code-comment">// BAD: index as key — list reorder causes full re-render</span>
+{items.<span class="code-fn">map</span>((item, i) => &lt;Item <span class="code-keyword">key</span>={i} {...item} /&gt;)}
+
+<span class="code-comment">// GOOD: stable unique key</span>
+{items.<span class="code-fn">map</span>(item => &lt;Item <span class="code-keyword">key</span>={item.id} {...item} /&gt;)}</div>
+      </div>
+      <div class="block"><div class="block-label bl-pitfall">Common Pitfalls</div>
+        <div class="pitfall-item">Using Math.random() as key — generates new key every render, forcing complete re-mount.</div>
+        <div class="pitfall-item">Using array index for lists that can be reordered, filtered, or items added/removed at front.</div>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"React uses two heuristics — type-check and keys — to reduce diffing from O(n³) to O(n). Keys tell React which element is which across renders."</div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qb4')">✓ Mark as Done</button>
+    </div>
+  </div>
+
+  <!-- Q: JSX -->
+  <div class="q-card" id="qb5">
+    <div class="q-header" onclick="toggleQ('qb5')">
+      <div class="q-number">5</div>
+      <div class="q-title">What does JSX compile to?</div>
+      <div class="q-badges"><span class="badge badge-beginner">Beginner</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-def">Definition</div>
+        <div class="definition">JSX is syntactic sugar that Babel compiles to <code>React.createElement()</code> calls (or in React 17+, the new JSX transform using <code>_jsx()</code> from react/jsx-runtime).</div>
+      </div>
+      <div class="block"><div class="block-label bl-simple">Example</div>
+        <div class="code-block"><span class="code-comment">// What you write (JSX):</span>
+<span class="code-keyword">const</span> el = &lt;h1 className=<span class="code-string">"title"</span>&gt;Hello&lt;/h1&gt;;
+
+<span class="code-comment">// What Babel compiles to (old transform):</span>
+<span class="code-keyword">const</span> el = React.<span class="code-fn">createElement</span>(
+  <span class="code-string">'h1'</span>,
+  { className: <span class="code-string">'title'</span> },
+  <span class="code-string">'Hello'</span>
+);
+
+<span class="code-comment">// React 17+ new JSX transform (no React import needed):</span>
+<span class="code-keyword">import</span> { jsx <span class="code-keyword">as</span> _jsx } <span class="code-keyword">from</span> <span class="code-string">'react/jsx-runtime'</span>;
+<span class="code-keyword">const</span> el = <span class="code-fn">_jsx</span>(<span class="code-string">'h1'</span>, { className: <span class="code-string">'title'</span>, children: <span class="code-string">'Hello'</span> });</div>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"JSX compiles to React.createElement() calls. It's not magic — it's just a more readable way to write JavaScript object trees."</div>
+      </div>
+      <div class="block"><div class="block-label bl-trap">Interviewer Trap</div>
+        <div class="trap-box"><strong>Trap:</strong> "Why did older React need <code>import React from 'react'</code> in every file?" <br>→ Because JSX compiled to React.createElement(), React had to be in scope. The new JSX transform (React 17+) auto-imports the jsx runtime, removing this requirement.</div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qb5')">✓ Mark as Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ STATE PAGE ══════════════════════════════════════════ -->
+<div class="page" id="page-state">
+  <div class="section-header">
+    <div class="section-badge" style="background:rgba(34,211,238,0.1)">🔄</div>
+    <h2 style="color:#22d3ee">React State & Props</h2>
+    <span>Beginner → Advanced</span>
+  </div>
+
+  <div class="q-card" id="qs1">
+    <div class="q-header" onclick="toggleQ('qs1')">
+      <div class="q-number">1</div>
+      <div class="q-title">What is useState? What triggers a re-render? ⭐</div>
+      <div class="q-badges"><span class="badge badge-star">⭐</span><span class="badge badge-beginner">Beginner</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-def">Definition</div>
+        <div class="definition"><code>useState</code> is a hook that adds local state to a functional component. Calling the setter function schedules a re-render with the new state value.</div>
+      </div>
+      <div class="block"><div class="block-label bl-deep">Deep Explanation</div>
+        <div class="deep-text">React triggers a re-render when:<br>
+          1. <strong>setState</strong> (useState setter) is called with a new value<br>
+          2. <strong>Parent re-renders</strong> and passes new props<br>
+          3. <strong>Context value changes</strong><br>
+          4. <strong>useReducer dispatch</strong> is called<br><br>
+          Important: React uses <strong>Object.is()</strong> to compare old vs new state. If you set state to the same value (or same object reference), React skips the re-render (bail-out optimization).</div>
+      </div>
+      <div class="block"><div class="block-label bl-simple">Example</div>
+        <div class="code-block"><span class="code-keyword">const</span> [count, setCount] = <span class="code-fn">useState</span>(0);
+
+<span class="code-comment">// Triggers re-render (new value)</span>
+<span class="code-fn">setCount</span>(count + 1);
+
+<span class="code-comment">// Does NOT trigger re-render (same value)</span>
+<span class="code-fn">setCount</span>(0); <span class="code-comment">// if count is already 0</span>
+
+<span class="code-comment">// Object trap — same reference, no re-render!</span>
+<span class="code-keyword">const</span> [obj, setObj] = <span class="code-fn">useState</span>({ a: 1 });
+obj.a = 2;
+<span class="code-fn">setObj</span>(obj); <span class="code-comment">// SAME reference → no re-render!</span>
+<span class="code-fn">setObj</span>({ ...obj }); <span class="code-comment">// NEW reference → re-render ✓</span></div>
+      </div>
+      <div class="block"><div class="block-label bl-pitfall">Common Pitfalls</div>
+        <div class="pitfall-item">Mutating state directly and re-setting same reference — React won't re-render.</div>
+        <div class="pitfall-item">Reading state immediately after setState — state updates are async/batched.</div>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"useState returns a state value and a setter. Calling the setter with a new value (by Object.is) schedules a re-render. Mutating objects without new references silently breaks reactivity."</div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qs1')">✓ Mark as Done</button>
+    </div>
+  </div>
+
+  <div class="q-card" id="qs2">
+    <div class="q-header" onclick="toggleQ('qs2')">
+      <div class="q-number">2</div>
+      <div class="q-title">What is a stale closure in useEffect? How to fix it? ⭐</div>
+      <div class="q-badges"><span class="badge badge-star">⭐</span><span class="badge badge-intermediate">Intermediate</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-def">Definition</div>
+        <div class="definition">A stale closure occurs when a useEffect callback (or event listener inside it) captures a variable from its initial render and never sees updated values — because the effect didn't re-run.</div>
+      </div>
+      <div class="block"><div class="block-label bl-deep">Deep Explanation</div>
+        <div class="deep-text">JavaScript closures capture variables by reference at the time the function is <em>created</em>. When useEffect runs, it creates a closure over the current values. If dependencies aren't listed, the effect's closure holds the old values forever — even if state updates.<br><br>Fixes:<br>
+          1. <strong>Add the variable to dependency array</strong> — effect re-runs when it changes<br>
+          2. <strong>Use functional setState</strong>: <code>setCount(prev => prev + 1)</code> — doesn't need current count in closure<br>
+          3. <strong>useRef</strong> — ref.current always gives the latest value without causing re-renders</div>
+      </div>
+      <div class="block"><div class="block-label bl-simple">Example</div>
+        <div class="code-block"><span class="code-comment">// STALE CLOSURE BUG</span>
+<span class="code-keyword">const</span> [count, setCount] = <span class="code-fn">useState</span>(0);
+<span class="code-fn">useEffect</span>(() => {
+  <span class="code-keyword">const</span> id = <span class="code-fn">setInterval</span>(() => {
+    <span class="code-fn">console</span>.<span class="code-fn">log</span>(count); <span class="code-comment">// Always logs 0!</span>
+  }, 1000);
+  <span class="code-keyword">return</span> () => <span class="code-fn">clearInterval</span>(id);
+}, []); <span class="code-comment">// [] means count is captured at mount (stale)</span>
+
+<span class="code-comment">// FIX 1: Add to deps</span>
+}, [count]); <span class="code-comment">// Re-runs when count changes</span>
+
+<span class="code-comment">// FIX 2: Functional update (no closure needed)</span>
+<span class="code-fn">setCount</span>(prev => prev + 1);</div>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"A stale closure is when useEffect captures old state because it ran with an empty dep array. Fix: add the variable to deps, or use functional setState / useRef for latest value."</div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qs2')">✓ Mark as Done</button>
+    </div>
+  </div>
+
+  <div class="q-card" id="qs3">
+    <div class="q-header" onclick="toggleQ('qs3')">
+      <div class="q-number">3</div>
+      <div class="q-title">What is the race condition in React data fetching? How to prevent it? ⭐</div>
+      <div class="q-badges"><span class="badge badge-star">⭐</span><span class="badge badge-advanced">Advanced</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-def">Definition</div>
+        <div class="definition">A race condition occurs when multiple async fetches are triggered in sequence (e.g. user types fast), and a slower earlier response overwrites the result of a faster later response.</div>
+      </div>
+      <div class="block"><div class="block-label bl-deep">Deep Explanation</div>
+        <div class="deep-text">User types "a" → fetch for "a" starts (slow, 800ms)<br>User types "ab" → fetch for "ab" starts (fast, 200ms)<br>Fetch "ab" resolves first (200ms), state = results for "ab"<br>Fetch "a" resolves later (800ms), state = results for "a" ← WRONG!<br><br>The solution is to use a <strong>cleanup flag</strong> or <strong>AbortController</strong> to ignore stale responses.</div>
+      </div>
+      <div class="block"><div class="block-label bl-simple">Fix with ignore flag</div>
+        <div class="code-block"><span class="code-fn">useEffect</span>(() => {
+  <span class="code-keyword">let</span> ignore = <span class="code-keyword">false</span>;
+
+  <span class="code-keyword">async function</span> <span class="code-fn">fetchData</span>() {
+    <span class="code-keyword">const</span> data = <span class="code-keyword">await</span> <span class="code-fn">fetch</span>(<span class="code-string">`/api/search?q=${query}`</span>);
+    <span class="code-keyword">if</span> (!ignore) <span class="code-fn">setResults</span>(data);
+  }
+
+  <span class="code-fn">fetchData</span>();
+  <span class="code-keyword">return</span> () => { ignore = <span class="code-keyword">true</span>; }; <span class="code-comment">// cleanup</span>
+}, [query]);</div>
+      </div>
+      <div class="block"><div class="block-label bl-real">With AbortController (modern)</div>
+        <div class="code-block"><span class="code-fn">useEffect</span>(() => {
+  <span class="code-keyword">const</span> controller = <span class="code-keyword">new</span> <span class="code-fn">AbortController</span>();
+  <span class="code-fn">fetch</span>(<span class="code-string">`/api?q=${query}`</span>, { signal: controller.signal })
+    .<span class="code-fn">then</span>(r => r.<span class="code-fn">json</span>()).<span class="code-fn">then</span>(setResults)
+    .<span class="code-fn">catch</span>(e => { <span class="code-keyword">if</span> (e.name !== <span class="code-string">'AbortError'</span>) <span class="code-keyword">throw</span> e; });
+  <span class="code-keyword">return</span> () => controller.<span class="code-fn">abort</span>();
+}, [query]);</div>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"Use an ignore flag or AbortController in useEffect cleanup — if a new render triggered a new fetch, mark previous responses as stale and ignore them."</div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qs3')">✓ Mark as Done</button>
+    </div>
+  </div>
+
+  <div class="q-card" id="qs4">
+    <div class="q-header" onclick="toggleQ('qs4')">
+      <div class="q-number">4</div>
+      <div class="q-title">What is prop drilling? How does Context solve it? ⭐</div>
+      <div class="q-badges"><span class="badge badge-star">⭐</span><span class="badge badge-intermediate">Intermediate</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-def">Definition</div>
+        <div class="definition">Prop drilling is passing props through multiple intermediate components that don't need them, just to get data to a deeply nested child. Context API provides a way to share values globally without drilling.</div>
+      </div>
+      <div class="block"><div class="block-label bl-simple">Example</div>
+        <div class="code-block"><span class="code-comment">// Problem: theme drills through A → B → C</span>
+App (theme) → ComponentA (theme) → ComponentB (theme) → ComponentC uses theme
+
+<span class="code-comment">// Solution: Context</span>
+<span class="code-keyword">const</span> ThemeCtx = React.<span class="code-fn">createContext</span>(<span class="code-string">'light'</span>);
+
+<span class="code-comment">// Provider at top</span>
+&lt;ThemeCtx.Provider value={theme}&gt;&lt;App /&gt;&lt;/ThemeCtx.Provider&gt;
+
+<span class="code-comment">// Consumer anywhere deep</span>
+<span class="code-keyword">const</span> theme = <span class="code-fn">useContext</span>(ThemeCtx); <span class="code-comment">// No drilling!</span></div>
+      </div>
+      <div class="block"><div class="block-label bl-deep">Performance Implication</div>
+        <div class="deep-text">Context has a key performance issue: <strong>every consumer re-renders when the context value changes</strong>, even if the specific part they use didn't change.<br><br>Fix strategies: Split context into smaller contexts, use <code>useMemo</code> on the context value, or use a dedicated state library like Zustand/Redux for high-frequency updates.</div>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"Prop drilling passes data through components that don't use it. Context solves this but causes all consumers to re-render on any change — use carefully for high-frequency state."</div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qs4')">✓ Mark as Done</button>
+    </div>
+  </div>
+
+  <div class="q-card" id="qs5">
+    <div class="q-header" onclick="toggleQ('qs5')">
+      <div class="q-number">5</div>
+      <div class="q-title">Why use functional updates: setCount(prev => prev + 1)?</div>
+      <div class="q-badges"><span class="badge badge-intermediate">Intermediate</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-def">Definition</div>
+        <div class="definition">Functional updates pass a function to the setter that receives the <em>latest</em> state as its argument, ensuring you never operate on stale state — regardless of batching or closures.</div>
+      </div>
+      <div class="block"><div class="block-label bl-simple">Why it matters</div>
+        <div class="code-block"><span class="code-comment">// BUG: multiple updates in same event — both read count=0</span>
+<span class="code-fn">setCount</span>(count + 1); <span class="code-comment">// 0 + 1 = 1</span>
+<span class="code-fn">setCount</span>(count + 1); <span class="code-comment">// 0 + 1 = 1 (still reads 0!)</span>
+<span class="code-comment">// Final count: 1 (expected: 2)</span>
+
+<span class="code-comment">// FIX: functional update — each receives latest</span>
+<span class="code-fn">setCount</span>(prev => prev + 1); <span class="code-comment">// 0 → 1</span>
+<span class="code-fn">setCount</span>(prev => prev + 1); <span class="code-comment">// 1 → 2 ✓</span></div>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"Use functional updates when new state depends on old state — avoids stale closure bugs and is safe with React's automatic batching."</div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qs5')">✓ Mark as Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ HOOKS PAGE ══════════════════════════════════════════ -->
+<div class="page" id="page-hooks">
+  <div class="section-header">
+    <div class="section-badge" style="background:rgba(6,182,212,0.1)">🎣</div>
+    <h2 style="color:#06b6d4">React Hooks Deep Dive</h2>
+    <span>Basic → Advanced</span>
+  </div>
+
+  <div class="q-card" id="qh1">
+    <div class="q-header" onclick="toggleQ('qh1')">
+      <div class="q-number">1</div>
+      <div class="q-title">What is useRef? How is it different from useState? ⭐</div>
+      <div class="q-badges"><span class="badge badge-star">⭐</span><span class="badge badge-beginner">Beginner</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-def">Definition</div>
+        <div class="definition"><code>useRef</code> returns a mutable object <code>{ current: value }</code> that persists across renders but does <strong>NOT</strong> trigger a re-render when changed. It's used for DOM references and mutable instance variables.</div>
+      </div>
+      <div class="block"><div class="block-label bl-compare">useRef vs useState</div>
+        <table class="compare-table">
+          <tr><th></th><th>useRef</th><th>useState</th></tr>
+          <tr><td>Triggers re-render?</td><td>NO</td><td>YES</td></tr>
+          <tr><td>Persists across renders?</td><td>YES</td><td>YES</td></tr>
+          <tr><td>Mutable?</td><td>YES (ref.current)</td><td>Only via setter</td></tr>
+          <tr><td>Use case</td><td>DOM refs, timers, prev values</td><td>UI state</td></tr>
+        </table>
+      </div>
+      <div class="block"><div class="block-label bl-simple">Common Uses</div>
+        <div class="code-block"><span class="code-comment">// 1. DOM reference</span>
+<span class="code-keyword">const</span> inputRef = <span class="code-fn">useRef</span>(<span class="code-keyword">null</span>);
+&lt;input ref={inputRef} /&gt;
+inputRef.current.<span class="code-fn">focus</span>(); <span class="code-comment">// programmatic focus</span>
+
+<span class="code-comment">// 2. Store interval ID (no re-render needed)</span>
+<span class="code-keyword">const</span> timerRef = <span class="code-fn">useRef</span>(<span class="code-keyword">null</span>);
+timerRef.current = <span class="code-fn">setInterval</span>(cb, 1000);
+<span class="code-fn">clearInterval</span>(timerRef.current);
+
+<span class="code-comment">// 3. Always-current value (solve stale closure)</span>
+<span class="code-keyword">const</span> countRef = <span class="code-fn">useRef</span>(count);
+countRef.current = count; <span class="code-comment">// always latest</span></div>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"useRef is a mutable box — changing ref.current doesn't trigger re-renders. Use it for DOM access, storing timers, and solving stale closure issues."</div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qh1')">✓ Mark as Done</button>
+    </div>
+  </div>
+
+  <div class="q-card" id="qh2">
+    <div class="q-header" onclick="toggleQ('qh2')">
+      <div class="q-number">2</div>
+      <div class="q-title">When to use useReducer instead of useState? ⭐</div>
+      <div class="q-badges"><span class="badge badge-star">⭐</span><span class="badge badge-intermediate">Intermediate</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-def">Definition</div>
+        <div class="definition"><code>useReducer</code> manages state via a <em>reducer function</em> — a pure function that takes (state, action) and returns new state. Best for complex state logic, multiple sub-values, or when next state depends on previous.</div>
+      </div>
+      <div class="block"><div class="block-label bl-deep">When to Choose</div>
+        <div class="deep-text">Use <strong>useReducer</strong> when:<br>
+          - State has multiple sub-fields that update together<br>
+          - State transitions have names/types (ADD_TODO, REMOVE_TODO)<br>
+          - Complex conditionals in your setState logic<br>
+          - You want testable, predictable state transitions<br>
+          - Next state depends on previous in complex ways<br><br>
+          Use <strong>useState</strong> when: state is a simple value, or 2-3 independent values.</div>
+      </div>
+      <div class="block"><div class="block-label bl-simple">Counter with useReducer</div>
+        <div class="code-block"><span class="code-keyword">const</span> <span class="code-fn">reducer</span> = (state, action) => {
+  <span class="code-keyword">switch</span> (action.type) {
+    <span class="code-keyword">case</span> <span class="code-string">'increment'</span>: <span class="code-keyword">return</span> { count: state.count + 1 };
+    <span class="code-keyword">case</span> <span class="code-string">'decrement'</span>: <span class="code-keyword">return</span> { count: state.count - 1 };
+    <span class="code-keyword">case</span> <span class="code-string">'reset'</span>: <span class="code-keyword">return</span> { count: 0 };
+    <span class="code-keyword">default</span>: <span class="code-keyword">return</span> state;
+  }
+};
+
+<span class="code-keyword">const</span> [state, dispatch] = <span class="code-fn">useReducer</span>(reducer, { count: 0 });
+<span class="code-fn">dispatch</span>({ type: <span class="code-string">'increment'</span> });</div>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"Use useReducer when state logic is complex, has named transitions, or multiple sub-values — it's like a local Redux, making state changes predictable and testable."</div>
+      </div>
+      <div class="block"><div class="block-label bl-followup">Interviewer Follow-Up</div>
+        <div class="follow-up"><p>Q: "How does useReducer relate to Redux?"</p><span>Same mental model: reducer + dispatch + actions. Redux adds a global store, middleware, DevTools, and cross-component sharing. useReducer is component-local.</span></div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qh2')">✓ Mark as Done</button>
+    </div>
+  </div>
+
+  <div class="q-card" id="qh3">
+    <div class="q-header" onclick="toggleQ('qh3')">
+      <div class="q-number">3</div>
+      <div class="q-title">Difference between useMemo and useCallback? ⭐</div>
+      <div class="q-badges"><span class="badge badge-star">⭐</span><span class="badge badge-intermediate">Intermediate</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-def">Definition</div>
+        <div class="definition"><code>useMemo</code> memoizes a <em>computed value</em>. <code>useCallback</code> memoizes a <em>function reference</em>. Both recompute only when dependencies change.</div>
+      </div>
+      <div class="block"><div class="block-label bl-compare">Comparison</div>
+        <table class="compare-table">
+          <tr><th></th><th>useMemo</th><th>useCallback</th></tr>
+          <tr><td>Returns</td><td>Memoized value</td><td>Memoized function</td></tr>
+          <tr><td>Use case</td><td>Expensive calculations</td><td>Stable function refs for child props</td></tr>
+          <tr><td>Equivalent</td><td>useMemo(() => fn(), deps)</td><td>useMemo(() => fn, deps)</td></tr>
+        </table>
+      </div>
+      <div class="block"><div class="block-label bl-simple">Example</div>
+        <div class="code-block"><span class="code-comment">// useMemo: heavy computation cached</span>
+<span class="code-keyword">const</span> sortedList = <span class="code-fn">useMemo</span>(
+  () => items.<span class="code-fn">sort</span>((a, b) => a.price - b.price),
+  [items]
+);
+
+<span class="code-comment">// useCallback: stable reference for child component</span>
+<span class="code-keyword">const</span> handleClick = <span class="code-fn">useCallback</span>(() => {
+  <span class="code-fn">dispatch</span>({ type: <span class="code-string">'ADD'</span>, payload: item });
+}, [item, dispatch]);
+<span class="code-comment">// Without useCallback, new fn reference each render</span>
+<span class="code-comment">// → React.memo child re-renders unnecessarily</span></div>
+      </div>
+      <div class="block"><div class="block-label bl-pitfall">Common Pitfalls</div>
+        <div class="pitfall-item">Using useMemo/useCallback everywhere "for performance" — they have overhead too. Only use when you measure a problem.</div>
+        <div class="pitfall-item">useMemo without React.memo on child — memoized function is useless if child always re-renders anyway.</div>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"useMemo caches a computed value; useCallback caches a function reference. Both prevent unnecessary recalculation/recreation — but only pay off when combined with React.memo or when computation is truly expensive."</div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qh3')">✓ Mark as Done</button>
+    </div>
+  </div>
+
+  <div class="q-card" id="qh4">
+    <div class="q-header" onclick="toggleQ('qh4')">
+      <div class="q-number">4</div>
+      <div class="q-title">What is referential equality and why does it matter? ⭐⭐</div>
+      <div class="q-badges"><span class="badge badge-intermediate">Intermediate</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-def">Definition</div>
+        <div class="definition">Referential equality means two variables point to the exact same object in memory (<code>===</code>). In React, new object/function literals created on every render always fail equality checks, causing unnecessary re-renders.</div>
+      </div>
+      <div class="block"><div class="block-label bl-simple">Why it breaks React.memo</div>
+        <div class="code-block"><span class="code-keyword">const</span> Parent = () => {
+  <span class="code-comment">// New function object EVERY render</span>
+  <span class="code-keyword">const</span> onClick = () => <span class="code-fn">doSomething</span>();
+  <span class="code-keyword">return</span> &lt;Child onClick={onClick} /&gt;;
+};
+<span class="code-comment">// React.memo on Child compares: onClick_old === onClick_new</span>
+<span class="code-comment">// → false every time → memo is useless!</span>
+
+<span class="code-comment">// FIX: useCallback gives stable reference</span>
+<span class="code-keyword">const</span> onClick = <span class="code-fn">useCallback</span>(() => <span class="code-fn">doSomething</span>(), []);</div>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"Every render creates new objects/functions — they're always 'not equal' by reference. useCallback and useMemo preserve stable references, making React.memo and useEffect deps work correctly."</div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qh4')">✓ Mark as Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ ROUTER PAGE ══════════════════════════════════════════ -->
+<div class="page" id="page-router">
+  <div class="section-header">
+    <div class="section-badge" style="background:rgba(202,138,4,0.1)">🌐</div>
+    <h2 style="color:var(--router)">React Router v6</h2>
+    <span>Beginner → Advanced</span>
+  </div>
+
+  <div class="q-card" id="qr1">
+    <div class="q-header" onclick="toggleQ('qr1')">
+      <div class="q-number">1</div>
+      <div class="q-title">Link vs NavLink — what's the difference?</div>
+      <div class="q-badges"><span class="badge badge-beginner">Beginner</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-def">Definition</div>
+        <div class="definition"><code>Link</code> renders an anchor tag that handles SPA navigation. <code>NavLink</code> is Link + active state detection — it adds an <code>active</code> class when its <code>to</code> path matches the current URL.</div>
+      </div>
+      <div class="block"><div class="block-label bl-simple">Example</div>
+        <div class="code-block"><span class="code-comment">// Link: basic navigation</span>
+&lt;Link to=<span class="code-string">"/about"</span>&gt;About&lt;/Link&gt;
+
+<span class="code-comment">// NavLink: adds 'active' class when route matches</span>
+&lt;NavLink
+  to=<span class="code-string">"/about"</span>
+  className={({ isActive }) =>
+    isActive ? <span class="code-string">"nav-link active"</span> : <span class="code-string">"nav-link"</span>
+  }
+&gt;About&lt;/NavLink&gt;</div>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"NavLink is Link with built-in active state — use it for nav menus where you want to highlight the current route."</div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qr1')">✓ Mark as Done</button>
+    </div>
+  </div>
+
+  <div class="q-card" id="qr2">
+    <div class="q-header" onclick="toggleQ('qr2')">
+      <div class="q-number">2</div>
+      <div class="q-title">How to implement a protected route in React Router v6? ⭐</div>
+      <div class="q-badges"><span class="badge badge-star">⭐</span><span class="badge badge-intermediate">Intermediate</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-def">Definition</div>
+        <div class="definition">A protected route redirects unauthenticated users to a login page. In v6, this is done via a wrapper component that checks auth status and renders either <code>&lt;Outlet /&gt;</code> or <code>&lt;Navigate /&gt;</code>.</div>
+      </div>
+      <div class="block"><div class="block-label bl-simple">Implementation</div>
+        <div class="code-block"><span class="code-comment">// ProtectedRoute.jsx</span>
+<span class="code-keyword">const</span> ProtectedRoute = () => {
+  <span class="code-keyword">const</span> { isAuthenticated } = <span class="code-fn">useAuth</span>();
+  <span class="code-keyword">return</span> isAuthenticated
+    ? &lt;Outlet /&gt;
+    : &lt;Navigate to=<span class="code-string">"/login"</span> replace /&gt;;
+};
+
+<span class="code-comment">// App.jsx routing setup</span>
+&lt;Routes&gt;
+  &lt;Route element={&lt;ProtectedRoute /&gt;}&gt;
+    &lt;Route path=<span class="code-string">"/dashboard"</span> element={&lt;Dashboard /&gt;} /&gt;
+    &lt;Route path=<span class="code-string">"/profile"</span> element={&lt;Profile /&gt;} /&gt;
+  &lt;/Route&gt;
+  &lt;Route path=<span class="code-string">"/login"</span> element={&lt;Login /&gt;} /&gt;
+&lt;/Routes&gt;</div>
+      </div>
+      <div class="block"><div class="block-label bl-real">Real-World: Redirect back after login</div>
+        <div class="code-block"><span class="code-comment">// Save intended destination before redirect</span>
+&lt;Navigate to=<span class="code-string">"/login"</span> state={{ from: location }} replace /&gt;
+
+<span class="code-comment">// In Login component, redirect after success</span>
+<span class="code-keyword">const</span> { state } = <span class="code-fn">useLocation</span>();
+<span class="code-fn">navigate</span>(state?.from?.pathname || <span class="code-string">'/'</span>);</div>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"In v6, wrap protected routes in a layout route component that renders Outlet if authenticated, or Navigate to /login if not."</div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qr2')">✓ Mark as Done</button>
+    </div>
+  </div>
+
+  <div class="q-card" id="qr3">
+    <div class="q-header" onclick="toggleQ('qr3')">
+      <div class="q-number">3</div>
+      <div class="q-title">What is Outlet? How is it used for nested routes?</div>
+      <div class="q-badges"><span class="badge badge-intermediate">Intermediate</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-def">Definition</div>
+        <div class="definition"><code>&lt;Outlet /&gt;</code> is a placeholder in a parent route component that renders the matched child route's element. It's how v6 handles nested routing and shared layouts.</div>
+      </div>
+      <div class="block"><div class="block-label bl-simple">Layout Example</div>
+        <div class="code-block"><span class="code-comment">// DashboardLayout.jsx — shared layout</span>
+<span class="code-keyword">const</span> DashboardLayout = () => (
+  &lt;div&gt;
+    &lt;Sidebar /&gt;
+    &lt;main&gt;
+      &lt;Outlet /&gt; <span class="code-comment">// Child renders here</span>
+    &lt;/main&gt;
+  &lt;/div&gt;
+);
+
+<span class="code-comment">// Routes config</span>
+&lt;Route path=<span class="code-string">"/dashboard"</span> element={&lt;DashboardLayout /&gt;}&gt;
+  &lt;Route index element={&lt;Overview /&gt;} /&gt;
+  &lt;Route path=<span class="code-string">"stats"</span> element={&lt;Stats /&gt;} /&gt;
+&lt;/Route&gt;</div>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"Outlet renders the active child route inside a layout component — it's how v6 composes shared headers/sidebars with nested pages."</div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qr3')">✓ Mark as Done</button>
+    </div>
+  </div>
+
+  <div class="q-card" id="qr4">
+    <div class="q-header" onclick="toggleQ('qr4')">
+      <div class="q-number">4</div>
+      <div class="q-title">BrowserRouter vs HashRouter — when to use which?</div>
+      <div class="q-badges"><span class="badge badge-beginner">Beginner</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-compare">Comparison</div>
+        <table class="compare-table">
+          <tr><th></th><th>BrowserRouter</th><th>HashRouter</th></tr>
+          <tr><td>URL format</td><td>/about</td><td>/#/about</td></tr>
+          <tr><td>Uses</td><td>HTML5 History API</td><td>URL hash (#)</td></tr>
+          <tr><td>Server config</td><td>Needs server rewrite (serve index.html)</td><td>No server config needed</td></tr>
+          <tr><td>SEO</td><td>Better</td><td>Worse (hash ignored)</td></tr>
+          <tr><td>Use when</td><td>Production apps with server control</td><td>Static hosts, Electron apps</td></tr>
+        </table>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"BrowserRouter uses clean URLs via History API but requires server-side rewrite. HashRouter uses #, works everywhere but has worse SEO."</div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qr4')">✓ Mark as Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ REDUX PAGE ══════════════════════════════════════════ -->
+<div class="page" id="page-redux">
+  <div class="section-header">
+    <div class="section-badge" style="background:rgba(118,74,188,0.1)">📦</div>
+    <h2 style="color:var(--redux)">Redux / Redux Toolkit</h2>
+    <span>Intermediate → Advanced</span>
+  </div>
+
+  <div class="q-card" id="qrd1">
+    <div class="q-header" onclick="toggleQ('qrd1')">
+      <div class="q-number">1</div>
+      <div class="q-title">What is Redux? What problem does it solve? ⭐</div>
+      <div class="q-badges"><span class="badge badge-star">⭐</span><span class="badge badge-intermediate">Intermediate</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-def">Definition</div>
+        <div class="definition">Redux is a predictable state container for JavaScript apps. It solves the problem of sharing state across many components with a single global store and strict unidirectional data flow.</div>
+      </div>
+      <div class="block"><div class="block-label bl-deep">Core Concepts</div>
+        <div class="deep-text"><strong>Three principles:</strong><br>
+          1. <strong>Single source of truth</strong> — one global store, predictable state<br>
+          2. <strong>State is read-only</strong> — only dispatch actions to change state<br>
+          3. <strong>Changes via pure reducers</strong> — no side effects, testable<br><br>
+          <strong>When to use Redux vs Context:</strong><br>
+          Context: simple, low-frequency shared state (theme, user)<br>
+          Redux: complex, high-frequency, cross-feature state; dev tools needed; large team</div>
+      </div>
+      <div class="block"><div class="block-label bl-simple">Data Flow</div>
+        <div class="code-block">Component → dispatch(action) → reducer(state, action) → new state → store → component re-renders</div>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"Redux provides a single predictable global store where state changes happen only through dispatched actions processed by pure reducers — making state changes traceable and testable."</div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qrd1')">✓ Mark as Done</button>
+    </div>
+  </div>
+
+  <div class="q-card" id="qrd2">
+    <div class="q-header" onclick="toggleQ('qrd2')">
+      <div class="q-number">2</div>
+      <div class="q-title">What is a slice in Redux Toolkit? How does it simplify Redux? ⭐</div>
+      <div class="q-badges"><span class="badge badge-star">⭐</span><span class="badge badge-intermediate">Intermediate</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-def">Definition</div>
+        <div class="definition">A slice is a collection of Redux reducer logic and actions for a single feature. <code>createSlice</code> auto-generates action creators and action types from reducer functions — eliminating 90% of Redux boilerplate.</div>
+      </div>
+      <div class="block"><div class="block-label bl-simple">Before vs After RTK</div>
+        <div class="code-block"><span class="code-comment">// BEFORE (classic Redux — 40+ lines)</span>
+<span class="code-keyword">const</span> INCREMENT = <span class="code-string">'counter/increment'</span>;
+<span class="code-keyword">const</span> <span class="code-fn">increment</span> = () => ({ type: INCREMENT });
+<span class="code-keyword">const</span> <span class="code-fn">counterReducer</span> = (state = 0, action) => { ... };
+
+<span class="code-comment">// AFTER RTK createSlice (10 lines!)</span>
+<span class="code-keyword">const</span> counterSlice = <span class="code-fn">createSlice</span>({
+  name: <span class="code-string">'counter'</span>,
+  initialState: { value: 0 },
+  reducers: {
+    <span class="code-fn">increment</span>: state => { state.value += 1; }, <span class="code-comment">// Immer!</span>
+    <span class="code-fn">decrement</span>: state => { state.value -= 1; },
+    <span class="code-fn">setBy</span>: (state, action) => { state.value = action.payload; }
+  }
+});
+<span class="code-keyword">export const</span> { increment, decrement, setBy } = counterSlice.actions;</div>
+      </div>
+      <div class="block"><div class="block-label bl-deep">Immer Under the Hood</div>
+        <div class="deep-text">RTK uses <strong>Immer</strong> inside reducers — you can write "mutating" code (<code>state.value += 1</code>) and Immer produces a new immutable state behind the scenes. This removes the need for <code>...spread</code> gymnastics in every reducer.</div>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"createSlice auto-generates action creators + action types from reducer functions, and Immer lets you write mutating-looking code that's actually immutable."</div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qrd2')">✓ Mark as Done</button>
+    </div>
+  </div>
+
+  <div class="q-card" id="qrd3">
+    <div class="q-header" onclick="toggleQ('qrd3')">
+      <div class="q-number">3</div>
+      <div class="q-title">What is createAsyncThunk? How does it handle loading/error states? ⭐</div>
+      <div class="q-badges"><span class="badge badge-star">⭐</span><span class="badge badge-advanced">Advanced</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-def">Definition</div>
+        <div class="definition"><code>createAsyncThunk</code> generates a thunk that dispatches lifecycle actions: <code>pending</code>, <code>fulfilled</code>, and <code>rejected</code> — automatically, based on your async function's promise.</div>
+      </div>
+      <div class="block"><div class="block-label bl-simple">Full Example</div>
+        <div class="code-block"><span class="code-comment">// 1. Create the thunk</span>
+<span class="code-keyword">export const</span> fetchUser = <span class="code-fn">createAsyncThunk</span>(
+  <span class="code-string">'user/fetchById'</span>,
+  <span class="code-keyword">async</span> (userId, { rejectWithValue }) => {
+    <span class="code-keyword">try</span> {
+      <span class="code-keyword">const</span> res = <span class="code-keyword">await</span> axios.<span class="code-fn">get</span>(<span class="code-string">`/api/users/${userId}`</span>);
+      <span class="code-keyword">return</span> res.data;
+    } <span class="code-keyword">catch</span> (err) {
+      <span class="code-keyword">return</span> <span class="code-fn">rejectWithValue</span>(err.response.data);
+    }
+  }
+);
+
+<span class="code-comment">// 2. Handle in slice</span>
+extraReducers: (builder) => {
+  builder
+    .<span class="code-fn">addCase</span>(fetchUser.pending, state => {
+      state.status = <span class="code-string">'loading'</span>;
+    })
+    .<span class="code-fn">addCase</span>(fetchUser.fulfilled, (state, action) => {
+      state.status = <span class="code-string">'succeeded'</span>;
+      state.user = action.payload;
+    })
+    .<span class="code-fn">addCase</span>(fetchUser.rejected, (state, action) => {
+      state.status = <span class="code-string">'failed'</span>;
+      state.error = action.payload;
+    });
+}</div>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"createAsyncThunk wraps async logic and auto-dispatches pending/fulfilled/rejected actions — use extraReducers in your slice to handle each lifecycle state."</div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qrd3')">✓ Mark as Done</button>
+    </div>
+  </div>
+
+  <div class="q-card" id="qrd4">
+    <div class="q-header" onclick="toggleQ('qrd4')">
+      <div class="q-number">4</div>
+      <div class="q-title">Explain Flux architecture. How does Redux implement it? What role does Immer play? ⭐</div>
+      <div class="q-badges"><span class="badge badge-star">⭐</span><span class="badge badge-advanced">Advanced</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-def">Definition</div>
+        <div class="definition">Flux is an application architecture pattern for unidirectional data flow: Action → Dispatcher → Store → View. Redux is an implementation of Flux (simplified — no dispatcher, reducer is pure function).</div>
+      </div>
+      <div class="block"><div class="block-label bl-compare">Flux vs Redux</div>
+        <table class="compare-table">
+          <tr><th>Concept</th><th>Flux</th><th>Redux</th></tr>
+          <tr><td>Stores</td><td>Multiple</td><td>Single store</td></tr>
+          <tr><td>Dispatcher</td><td>Explicit dispatcher</td><td>Built into store.dispatch</td></tr>
+          <tr><td>State mutation</td><td>Stores handle mutation</td><td>Pure reducers (immutable)</td></tr>
+          <tr><td>Data flow</td><td>Unidirectional</td><td>Unidirectional</td></tr>
+        </table>
+      </div>
+      <div class="block"><div class="block-label bl-deep">Immer's Role</div>
+        <div class="deep-text">Immutability is core to Redux — reducers must return new state objects, not mutate the old one. Writing <code>{ ...state, user: { ...state.user, name: action.payload } }</code> gets verbose fast.<br><br>Immer creates a "draft" proxy of state. You mutate the draft, Immer produces a structurally-shared immutable copy. RTK uses Immer automatically in all slice reducers.</div>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"Redux implements Flux's unidirectional data flow — Action → Reducer → Store → View. Immer makes immutable updates ergonomic by letting you write mutating code that produces immutable state."</div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qrd4')">✓ Mark as Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ AXIOS PAGE ══════════════════════════════════════════ -->
+<div class="page" id="page-axios">
+  <div class="section-header">
+    <div class="section-badge" style="background:rgba(22,163,74,0.1)">🌍</div>
+    <h2 style="color:var(--api)">API / Axios</h2>
+    <span>Beginner → Advanced</span>
+  </div>
+
+  <div class="q-card" id="qa1">
+    <div class="q-header" onclick="toggleQ('qa1')">
+      <div class="q-number">1</div>
+      <div class="q-title">What is Axios? Why use it over Fetch? ⭐</div>
+      <div class="q-badges"><span class="badge badge-star">⭐</span><span class="badge badge-beginner">Beginner</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-compare">Axios vs Fetch</div>
+        <table class="compare-table">
+          <tr><th>Feature</th><th>Axios</th><th>Fetch</th></tr>
+          <tr><td>JSON auto-parse</td><td>Yes ✓</td><td>Manual .json()</td></tr>
+          <tr><td>Error on 4xx/5xx</td><td>Yes ✓</td><td>No (only network errors)</td></tr>
+          <tr><td>Interceptors</td><td>Built-in ✓</td><td>Not built-in</td></tr>
+          <tr><td>Request cancellation</td><td>CancelToken / AbortController</td><td>AbortController</td></tr>
+          <tr><td>Request timeout</td><td>Built-in ✓</td><td>Manual</td></tr>
+          <tr><td>Browser support</td><td>Polyfills IE</td><td>Modern browsers</td></tr>
+        </table>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"Axios auto-parses JSON, throws on 4xx/5xx errors (Fetch doesn't!), and has built-in interceptors and timeout. Fetch is native but more verbose for production use."</div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qa1')">✓ Mark as Done</button>
+    </div>
+  </div>
+
+  <div class="q-card" id="qa2">
+    <div class="q-header" onclick="toggleQ('qa2')">
+      <div class="q-number">2</div>
+      <div class="q-title">What are Axios interceptors? Give a real use case. ⭐</div>
+      <div class="q-badges"><span class="badge badge-star">⭐</span><span class="badge badge-intermediate">Intermediate</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-def">Definition</div>
+        <div class="definition">Interceptors are middleware functions that run before every request is sent or after every response is received. They can modify, log, or handle errors globally.</div>
+      </div>
+      <div class="block"><div class="block-label bl-real">Real-World: Auth Token Injection</div>
+        <div class="code-block"><span class="code-comment">// Request interceptor: add token to every request</span>
+axios.interceptors.request.<span class="code-fn">use</span>(config => {
+  <span class="code-keyword">const</span> token = localStorage.<span class="code-fn">getItem</span>(<span class="code-string">'accessToken'</span>);
+  <span class="code-keyword">if</span> (token) config.headers.Authorization = <span class="code-string">`Bearer ${token}`</span>;
+  <span class="code-keyword">return</span> config;
+});
+
+<span class="code-comment">// Response interceptor: handle 401 globally</span>
+axios.interceptors.response.<span class="code-fn">use</span>(
+  response => response,
+  <span class="code-keyword">async</span> error => {
+    <span class="code-keyword">if</span> (error.response?.status === 401) {
+      <span class="code-keyword">await</span> <span class="code-fn">refreshToken</span>();
+      <span class="code-keyword">return</span> axios.<span class="code-fn">request</span>(error.config); <span class="code-comment">// retry</span>
+    }
+    <span class="code-keyword">return</span> Promise.<span class="code-fn">reject</span>(error);
+  }
+);</div>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"Interceptors are request/response middleware. Common use: attach auth tokens on request, handle 401/token refresh on response — once, globally, without repeating in every API call."</div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qa2')">✓ Mark as Done</button>
+    </div>
+  </div>
+
+  <div class="q-card" id="qa3">
+    <div class="q-header" onclick="toggleQ('qa3')">
+      <div class="q-number">3</div>
+      <div class="q-title">How would you implement automatic token refresh with interceptors? ⭐⭐</div>
+      <div class="q-badges"><span class="badge badge-advanced">Advanced</span></div>
+      <div class="q-chevron">▼</div>
+    </div>
+    <div class="q-body">
+      <div class="block"><div class="block-label bl-deep">The Challenge</div>
+        <div class="deep-text">When an access token expires, you need to:<br>
+          1. Detect the 401 error<br>
+          2. Call the refresh endpoint once (not multiple times if concurrent requests fail)<br>
+          3. Retry all failed requests with the new token<br><br>
+          The tricky part: if 5 requests fail simultaneously, you only want ONE refresh call. Use a promise queue to hold subsequent requests while the first refresh happens.</div>
+      </div>
+      <div class="block"><div class="block-label bl-real">Production Implementation</div>
+        <div class="code-block"><span class="code-keyword">let</span> isRefreshing = <span class="code-keyword">false</span>;
+<span class="code-keyword">let</span> failedQueue = [];
+
+<span class="code-keyword">const</span> <span class="code-fn">processQueue</span> = (error, token = <span class="code-keyword">null</span>) => {
+  failedQueue.<span class="code-fn">forEach</span>(({ resolve, reject }) =>
+    error ? <span class="code-fn">reject</span>(error) : <span class="code-fn">resolve</span>(token)
+  );
+  failedQueue = [];
+};
+
+api.interceptors.response.<span class="code-fn">use</span>(<span class="code-keyword">null</span>, <span class="code-keyword">async</span> error => {
+  <span class="code-keyword">if</span> (error.response?.status !== 401) <span class="code-keyword">throw</span> error;
+
+  <span class="code-keyword">if</span> (isRefreshing) {
+    <span class="code-comment">// Queue this request until token refreshed</span>
+    <span class="code-keyword">return</span> <span class="code-keyword">new</span> Promise((resolve, reject) => {
+      failedQueue.<span class="code-fn">push</span>({ resolve, reject });
+    }).<span class="code-fn">then</span>(token => {
+      error.config.headers.Authorization = <span class="code-string">`Bearer ${token}`</span>;
+      <span class="code-keyword">return</span> api(error.config);
+    });
+  }
+
+  isRefreshing = <span class="code-keyword">true</span>;
+  <span class="code-keyword">try</span> {
+    <span class="code-keyword">const</span> { data } = <span class="code-keyword">await</span> api.<span class="code-fn">post</span>(<span class="code-string">'/auth/refresh'</span>);
+    <span class="code-fn">processQueue</span>(<span class="code-keyword">null</span>, data.token);
+    error.config.headers.Authorization = <span class="code-string">`Bearer ${data.token}`</span>;
+    <span class="code-keyword">return</span> api(error.config);
+  } <span class="code-keyword">catch</span> (e) {
+    <span class="code-fn">processQueue</span>(e, <span class="code-keyword">null</span>);
+    <span class="code-keyword">throw</span> e;
+  } <span class="code-keyword">finally</span> {
+    isRefreshing = <span class="code-keyword">false</span>;
+  }
+});</div>
+      </div>
+      <div class="block"><div class="block-label bl-oneliner">Interview One-Liner</div>
+        <div class="one-liner">"Use a lock flag and a queue — first 401 triggers refresh, subsequent 401s wait in queue. When refresh resolves, drain the queue and retry all failed requests."</div>
+      </div>
+      <button class="mark-done-btn" onclick="markDone('qa3')">✓ Mark as Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ CHEAT SHEET PAGE ══════════════════════════════════════════ -->
+<div class="page" id="page-cheatsheet">
+  <div class="section-header">
+    <div class="section-badge" style="background:rgba(124,58,237,0.1)">📋</div>
+    <h2 style="color:#a78bfa">Quick Revision Cheat Sheet</h2>
+    <span>Last-minute review</span>
+  </div>
+  <div class="cheat-grid">
+    <div class="cheat-card">
+      <h4>⚛️ React Core</h4>
+      <div class="cheat-item"><code>JSX</code> compiles to React.createElement() / _jsx()</div>
+      <div class="cheat-item"><code>VDOM</code> in-memory DOM; React diffs old vs new → min DOM updates</div>
+      <div class="cheat-item"><code>reconciliation</code> O(n) via type-check + key heuristics</div>
+      <div class="cheat-item"><code>SPA</code> one HTML + client-side routing; bad SEO by default</div>
+      <div class="cheat-item"><code>Vite</code> no-bundle dev via native ESM; esbuild transpiler</div>
+      <div class="cheat-item"><code>controlled input</code> value = state; onChange updates state</div>
+    </div>
+    <div class="cheat-card">
+      <h4>🔄 State Rules</h4>
+      <div class="cheat-item"><code>re-render triggers</code> setState, new props, context change, dispatch</div>
+      <div class="cheat-item"><code>Object.is()</code> used to compare old/new state</div>
+      <div class="cheat-item"><code>stale closure</code> useEffect captures old value; fix with deps/ref</div>
+      <div class="cheat-item"><code>race condition</code> use ignore flag or AbortController in cleanup</div>
+      <div class="cheat-item"><code>functional update</code> setCount(prev => prev+1) avoids stale reads</div>
+      <div class="cheat-item"><code>key prop</code> stable unique ID; never use index for dynamic lists</div>
+    </div>
+    <div class="cheat-card">
+      <h4>🎣 Hooks</h4>
+      <div class="cheat-item"><code>useRef</code> mutable box; no re-render; DOM refs, timer IDs</div>
+      <div class="cheat-item"><code>useReducer</code> (state, action) => newState; local Redux pattern</div>
+      <div class="cheat-item"><code>useMemo</code> memoize value; recalc on dep change</div>
+      <div class="cheat-item"><code>useCallback</code> memoize function ref; for React.memo children</div>
+      <div class="cheat-item"><code>referential eq</code> new objects always fail ===; use memo to stabilize</div>
+      <div class="cheat-item"><code>useEffect cleanup</code> return fn: removes listeners, cancels fetches</div>
+    </div>
+    <div class="cheat-card">
+      <h4>📦 Redux / RTK</h4>
+      <div class="cheat-item"><code>createSlice</code> auto-generates actions + reducers</div>
+      <div class="cheat-item"><code>Immer</code> allows mutation syntax; produces immutable state</div>
+      <div class="cheat-item"><code>createAsyncThunk</code> pending → fulfilled → rejected lifecycle</div>
+      <div class="cheat-item"><code>useSelector</code> subscribe to slice; re-renders on selected change</div>
+      <div class="cheat-item"><code>useDispatch</code> returns dispatch function to fire actions</div>
+      <div class="cheat-item"><code>Flux flow</code> Action → Reducer → Store → View (unidirectional)</div>
+    </div>
+    <div class="cheat-card">
+      <h4>🌐 React Router v6</h4>
+      <div class="cheat-item"><code>Link</code> SPA navigation; no full reload</div>
+      <div class="cheat-item"><code>NavLink</code> Link + isActive state for nav menus</div>
+      <div class="cheat-item"><code>Outlet</code> renders matched child route in layout</div>
+      <div class="cheat-item"><code>useParams</code> read :id from URL</div>
+      <div class="cheat-item"><code>Navigate</code> programmatic redirect component</div>
+      <div class="cheat-item"><code>BrowserRouter</code> History API; needs server rewrite</div>
+    </div>
+    <div class="cheat-card">
+      <h4>🌍 Axios</h4>
+      <div class="cheat-item"><code>interceptors</code> global request/response middleware</div>
+      <div class="cheat-item"><code>vs Fetch</code> auto JSON, throws 4xx/5xx, timeout built-in</div>
+      <div class="cheat-item"><code>POST</code> axios.post(url, data, {headers})</div>
+      <div class="cheat-item"><code>query params</code> axios.get(url, { params: { q, page } })</div>
+      <div class="cheat-item"><code>token refresh</code> isRefreshing flag + failedQueue pattern</div>
+      <div class="cheat-item"><code>abort</code> axios.CancelToken / AbortController</div>
+    </div>
+  </div>
+  <div style="margin-top:24px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;">
+    <h3 style="font-size:14px;font-weight:700;color:var(--accent);margin-bottom:14px;">⚡ Key Differences at a Glance</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;">
+      <div style="color:var(--muted)">Library = you call it</div><div style="color:#94a3b8">Framework = it calls you (IoC)</div>
+      <div style="color:var(--muted)">useMemo = cached value</div><div style="color:#94a3b8">useCallback = cached function</div>
+      <div style="color:var(--muted)">useRef = no re-render</div><div style="color:#94a3b8">useState = triggers re-render</div>
+      <div style="color:var(--muted)">Context = low-freq global state</div><div style="color:#94a3b8">Redux = complex/high-freq state</div>
+      <div style="color:var(--muted)">BrowserRouter = clean URLs</div><div style="color:#94a3b8">HashRouter = #hash, no server config</div>
+      <div style="color:var(--muted)">Fetch = native, verbose</div><div style="color:#94a3b8">Axios = batteries included</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ TOP 20 PAGE ══════════════════════════════════════════ -->
+<div class="page" id="page-top20">
+  <div class="section-header">
+    <div class="section-badge" style="background:rgba(251,191,36,0.1)">🏆</div>
+    <h2 style="color:#fbbf24">Top 20 Must-Know Interview Questions</h2>
+    <span>Priority order</span>
+  </div>
+  <div style="background:rgba(251,191,36,0.05);border:1px solid rgba(251,191,36,0.2);border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#fcd34d;">
+    Study these 20 before your interview. They appear in 90%+ of senior frontend interviews.
+  </div>
+  <div class="top20-list">
+    <div class="top20-item"><div class="top20-num">1</div><div><div class="top20-q">What is the Virtual DOM and how does React use it?</div><div class="top20-why">Asked in nearly every React interview — foundational concept</div></div></div>
+    <div class="top20-item"><div class="top20-num">2</div><div><div class="top20-q">Explain React's reconciliation algorithm and keys</div><div class="top20-why">Tests deep React knowledge; key misuse = real bugs</div></div></div>
+    <div class="top20-item"><div class="top20-num">3</div><div><div class="top20-q">What is a stale closure in useEffect? How to fix?</div><div class="top20-why">Advanced hook question; common real-world bug</div></div></div>
+    <div class="top20-item"><div class="top20-num">4</div><div><div class="top20-q">useMemo vs useCallback — when to use each?</div><div class="top20-why">Performance optimization; tests understanding of referential equality</div></div></div>
+    <div class="top20-item"><div class="top20-num">5</div><div><div class="top20-q">What is Redux? Flux architecture? How does Immer help?</div><div class="top20-why">Required for any role using Redux Toolkit</div></div></div>
+    <div class="top20-item"><div class="top20-num">6</div><div><div class="top20-q">What is createAsyncThunk and its lifecycle actions?</div><div class="top20-why">RTK async pattern; used in every production Redux app</div></div></div>
+    <div class="top20-item"><div class="top20-num">7</div><div><div class="top20-q">Race condition in data fetching — cause and fix</div><div class="top20-why">Shows real-world useEffect mastery</div></div></div>
+    <div class="top20-item"><div class="top20-num">8</div><div><div class="top20-q">Context API vs Redux — when to use which?</div><div class="top20-why">Architecture decision question; tests maturity</div></div></div>
+    <div class="top20-item"><div class="top20-num">9</div><div><div class="top20-q">How to implement protected routes in React Router v6?</div><div class="top20-why">Auth flow — every app has this</div></div></div>
+    <div class="top20-item"><div class="top20-num">10</div><div><div class="top20-q">What triggers a re-render in React?</div><div class="top20-why">Performance fundamentals</div></div></div>
+    <div class="top20-item"><div class="top20-num">11</div><div><div class="top20-q">useRef vs useState — differences and use cases</div><div class="top20-why">Intermediate hook; DOM access + stale closure fix</div></div></div>
+    <div class="top20-item"><div class="top20-num">12</div><div><div class="top20-q">What is prop drilling and how does Context solve it?</div><div class="top20-why">State architecture patterns</div></div></div>
+    <div class="top20-item"><div class="top20-num">13</div><div><div class="top20-q">What are Axios interceptors? Token refresh pattern?</div><div class="top20-why">Production API patterns</div></div></div>
+    <div class="top20-item"><div class="top20-num">14</div><div><div class="top20-q">SPA advantages and disadvantages?</div><div class="top20-why">Architecture fundamentals; leads to SSR discussion</div></div></div>
+    <div class="top20-item"><div class="top20-num">15</div><div><div class="top20-q">What does JSX compile to?</div><div class="top20-why">Shows React internals knowledge</div></div></div>
+    <div class="top20-item"><div class="top20-num">16</div><div><div class="top20-q">useReducer — when over useState? Implement a counter.</div><div class="top20-why">State management patterns; relates to Redux design</div></div></div>
+    <div class="top20-item"><div class="top20-num">17</div><div><div class="top20-q">Library vs Framework — Inversion of Control</div><div class="top20-why">Always asked; tests conceptual clarity</div></div></div>
+    <div class="top20-item"><div class="top20-num">18</div><div><div class="top20-q">Why is index as key a bad practice?</div><div class="top20-why">Common mistake; shows reconciliation knowledge</div></div></div>
+    <div class="top20-item"><div class="top20-num">19</div><div><div class="top20-q">useEffect cleanup function — subscriptions and timers</div><div class="top20-why">Memory leaks in production; important for seniors</div></div></div>
+    <div class="top20-item"><div class="top20-num">20</div><div><div class="top20-q">What is Vite and why is it faster than CRA?</div><div class="top20-why">Build tooling awareness; shows modern React knowledge</div></div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ MOCK INTERVIEW PAGE ══════════════════════════════════════════ -->
+<div class="page" id="page-mock">
+  <div class="section-header">
+    <div class="section-badge" style="background:rgba(239,68,68,0.1)">🎯</div>
+    <h2 style="color:#f87171">Mock Interview — 5 Tricky Questions</h2>
+    <span>Simulate real interview pressure</span>
+  </div>
+  <div style="background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#fca5a5;">
+    Answer each question mentally first, then click "Reveal Expert Answer" to compare. These questions are designed to trip up even experienced developers.
+  </div>
+
+  <!-- Mock Q1 -->
+  <div class="mock-card">
+    <div class="mock-header">
+      <span class="mock-role mock-interviewer">Interviewer</span>
+      <span style="font-size:12px;color:var(--muted);margin-left:4px;">Question 1 of 5 — Intermediate</span>
+    </div>
+    <div class="mock-content">
+      <div class="mock-q">"You call setCount(count + 1) three times in a row inside a click handler. What will count be after the click? Why?"</div>
+      <button class="mock-reveal-btn" onclick="revealMock(this)">Reveal Expert Answer</button>
+      <div class="mock-answer">
+        <strong>Answer:</strong> Count increases by only 1, not 3. In React 18+ (auto-batching), all three setCount calls in the same event handler are batched into one re-render. Since all three read the same stale value of count (e.g. 0), they all compute 0+1=1. Only the last update wins.
+        <br><br><strong>Fix:</strong> Use functional updates: <code>setCount(prev => prev + 1)</code> three times — each receives the latest queued state, so count correctly becomes 3.
+      </div>
+      <div class="mock-trap-note"><strong>Trap:</strong> Many candidates say "it will be count + 3" — they forget about batching and stale reads.</div>
+    </div>
+  </div>
+
+  <!-- Mock Q2 -->
+  <div class="mock-card">
+    <div class="mock-header">
+      <span class="mock-role mock-interviewer">Interviewer</span>
+      <span style="font-size:12px;color:var(--muted);margin-left:4px;">Question 2 of 5 — Advanced</span>
+    </div>
+    <div class="mock-content">
+      <div class="mock-q">"I have a context providing an object: <code>{'{'} user, theme {'}'}</code>. A deeply nested component only uses theme. If only user changes, does the theme component re-render? How would you prevent it?"</div>
+      <button class="mock-reveal-btn" onclick="revealMock(this)">Reveal Expert Answer</button>
+      <div class="mock-answer">
+        <strong>Yes, it re-renders.</strong> Every context consumer re-renders when the context value changes — React doesn't know which part of the value changed. Since <code>{'{'} user, theme {'}'}</code> is a new object reference every time, even if theme is unchanged, all consumers re-render.
+        <br><br><strong>Fixes:</strong>
+        <br>1. <strong>Split contexts</strong>: separate UserContext and ThemeContext — theme component only subscribes to ThemeContext.
+        <br>2. <strong>Memoize value</strong>: <code>useMemo(() => ({'{'} user, theme {'}'}), [user, theme])</code> — prevents new object reference if neither changed.
+        <br>3. <strong>Use Zustand/Redux</strong> for user; keep ThemeContext simple.
+      </div>
+      <div class="mock-trap-note"><strong>Trap:</strong> Candidates often say "React will bail out if theme didn't change" — wrong. Context doesn't do granular diffing.</div>
+    </div>
+  </div>
+
+  <!-- Mock Q3 -->
+  <div class="mock-card">
+    <div class="mock-header">
+      <span class="mock-role mock-interviewer">Interviewer</span>
+      <span style="font-size:12px;color:var(--muted);margin-left:4px;">Question 3 of 5 — Advanced</span>
+    </div>
+    <div class="mock-content">
+      <div class="mock-q">"When can useMemo actually hurt performance? Give a concrete example."</div>
+      <button class="mock-reveal-btn" onclick="revealMock(this)">Reveal Expert Answer</button>
+      <div class="mock-answer">
+        <strong>useMemo has overhead:</strong> React must store the memoized value, compare dependencies on every render, and run the comparison logic. If the computation being memoized is trivial (e.g. <code>items.length</code>), the memo overhead exceeds the computation cost.
+        <br><br><strong>Example:</strong> <code>const count = useMemo(() => items.length, [items])</code> is slower than <code>const count = items.length</code>. Array length access is O(1); useMemo comparison is also O(1) but adds indirection.
+        <br><br><strong>Rule:</strong> Only memoize when: (1) computation is demonstrably slow (measure with profiler), or (2) result is passed as prop to a React.memo child. Otherwise, the cost of memoization outweighs the benefit.
+      </div>
+      <div class="mock-trap-note"><strong>Trap:</strong> "More memoization = better performance" is a common misconception. Premature optimization is a real anti-pattern.</div>
+    </div>
+  </div>
+
+  <!-- Mock Q4 -->
+  <div class="mock-card">
+    <div class="mock-header">
+      <span class="mock-role mock-interviewer">Interviewer</span>
+      <span style="font-size:12px;color:var(--muted);margin-left:4px;">Question 4 of 5 — Advanced Redux</span>
+    </div>
+    <div class="mock-content">
+      <div class="mock-q">"In RTK slice reducers, you write <code>state.user.name = action.payload</code>. Isn't that mutating state? Won't Redux break?"</div>
+      <button class="mock-reveal-btn" onclick="revealMock(this)">Reveal Expert Answer</button>
+      <div class="mock-answer">
+        <strong>Great question — this is Immer magic.</strong> RTK wraps all slice reducers with Immer's <code>produce()</code> function. When your reducer runs, it doesn't receive the real state object — it receives an Immer "draft proxy." Any mutations on the draft are recorded, and Immer produces a brand-new immutable state object at the end.
+        <br><br>So you <em>appear</em> to mutate, but Immer ensures the output is a completely new object with structural sharing (unchanged parts are the same reference). Redux receives a new reference → triggers re-renders correctly.
+        <br><br><strong>Caveat:</strong> Outside of createSlice/createReducer (e.g. in plain reducer), you must NOT mutate — Immer isn't wrapping it.
+      </div>
+      <div class="mock-trap-note"><strong>Trap:</strong> This trips up candidates who know "Redux requires immutability" but don't know how RTK/Immer works under the hood.</div>
+    </div>
+  </div>
+
+  <!-- Mock Q5 -->
+  <div class="mock-card">
+    <div class="mock-header">
+      <span class="mock-role mock-interviewer">Interviewer</span>
+      <span style="font-size:12px;color:var(--muted);margin-left:4px;">Question 5 of 5 — System Design</span>
+    </div>
+    <div class="mock-content">
+      <div class="mock-q">"You're building a large e-commerce app. Product listings, cart, user auth, search filters. Would you use Context API or Redux? Walk me through your architecture decision."</div>
+      <button class="mock-reveal-btn" onclick="revealMock(this)">Reveal Expert Answer</button>
+      <div class="mock-answer">
+        <strong>Hybrid approach — this is the senior answer:</strong>
+        <br><br>
+        <strong>Redux (RTK) for:</strong> Cart (complex, cross-feature, frequently updated), User auth (token, permissions — needed everywhere), Product listings (server state, pagination, caching)
+        <br><br>
+        <strong>Context for:</strong> Theme/locale (low-frequency, rarely changes), Modal/drawer state (UI-only, not business logic)
+        <br><br>
+        <strong>Consider React Query/TanStack Query for:</strong> Product listings, search results — it handles caching, loading states, background refetch, and stale-while-revalidate out of the box. This removes the need for async thunks for server state entirely.
+        <br><br>
+        <strong>Rule of thumb:</strong> Redux for client state (cart, UI state shared across features). React Query for server/remote state. Context for rarely-changing global config.
+      </div>
+      <div class="mock-trap-note"><strong>Expected mistake:</strong> Saying "just use Redux for everything" or "just use Context for everything" without justification. Interviewers want to see trade-off thinking.</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+let doneSet = new Set();
+
+function toggleQ(id) {
+  const card = document.getElementById(id);
+  card.classList.toggle('open');
+}
+
+function markDone(id) {
+  const card = document.getElementById(id);
+  card.classList.toggle('done');
+  if (card.classList.contains('done')) {
+    doneSet.add(id);
+  } else {
+    doneSet.delete(id);
+  }
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = document.querySelectorAll('.q-card').length;
+  const done = doneSet.size;
+  const pct = Math.round((done / total) * 100);
+  document.getElementById('prog-bar').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = `${done} / ${total} completed`;
+  document.getElementById('done-count').textContent = done;
+}
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  const navEl = document.getElementById('nav-' + name);
+  if (navEl) navEl.classList.add('active');
+}
+
+function revealMock(btn) {
+  const answer = btn.nextElementSibling;
+  answer.classList.toggle('visible');
+  btn.textContent = answer.classList.contains('visible') ? 'Hide Answer' : 'Reveal Expert Answer';
+}
+
+function searchQuestions(query) {
+  if (!query) return;
+  const q = query.toLowerCase();
+  const allCards = document.querySelectorAll('.q-card');
+  let found = false;
+  allCards.forEach(card => {
+    const title = card.querySelector('.q-title')?.textContent.toLowerCase() || '';
+    if (title.includes(q)) {
+      const pageEl = card.closest('.page');
+      const pageId = pageEl?.id?.replace('page-', '');
+      if (pageId) { showPage(pageId); found = true; }
+      card.classList.add('open');
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+}
+</script>
+</body>
+</html>
